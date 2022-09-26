@@ -110,18 +110,20 @@ describe("solchan_contract", () => {
   ): Promise<anchor.web3.PublicKey> {
     const currentThreadId = await getNextThreadID();
     const currentThreadPDA = await getThreadPDA(currentThreadId);
+    console.log("Next thread ID:", currentThreadId, "Next thread PDA:", currentThreadPDA)
 
     await program.methods
-      .startThread(text, Buffer.from(image))
-      .accounts({
+    .startThread(text, Buffer.from(image))
+    .accounts({
+        user: user.publicKey,
         imageboard: await getImageboardAccount(),
         thread: currentThreadPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
-        user: user.publicKey,
-      })
-      .signers([user])
-      .rpc();
+    })
+    .signers([user])
+    .rpc();
 
+    console.log("Created PDA:", currentThreadPDA)
     return currentThreadPDA;
   }
 

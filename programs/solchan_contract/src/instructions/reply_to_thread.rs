@@ -16,6 +16,7 @@ pub struct ReplyToThread<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
+    #[account(mut)]
     pub thread: Account<'info, Threads>,
 
     #[account(

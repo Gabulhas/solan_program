@@ -20,12 +20,12 @@ impl Content {
 
 #[account]
 pub struct Imageboard {
-    pub authority: Pubkey,
-    pub threads: u64,
+    pub authority: Pubkey, //32
+    pub threads: u64,      //8
 }
 
 impl Imageboard {
-    pub const SIZE: usize = 8 + 8 + 8;
+    pub const SIZE: usize = 8 + 8 + 32;
     pub fn new(authority: Pubkey) -> Imageboard {
         Imageboard {
             authority,
@@ -41,7 +41,7 @@ pub struct Threads {
 }
 
 impl Threads {
-    pub const SIZE: usize = 8 + Content::SIZE * 8;
+    pub const SIZE: usize = 8 + Content::SIZE + 8;
     pub fn new(content: Content) -> Threads {
         Threads {
             content,

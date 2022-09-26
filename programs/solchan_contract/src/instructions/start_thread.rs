@@ -16,9 +16,7 @@ pub struct StartThread<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    #[account(
-        seeds = [b"imageboard"], bump
-    )]
+    #[account(mut, seeds = [b"imageboard".as_ref()], bump)]
     pub imageboard: Account<'info, Imageboard>,
 
     #[account(
