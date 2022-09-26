@@ -49,7 +49,7 @@ describe("solchan_contract", () => {
   async function getNextThreadID(): Promise<number> {
     let imageboardPDA = await getImageboardAccount();
     let imageboardState = await program.account.imageboard.fetch(imageboardPDA);
-    return imageboardState.threads + 1;
+    return imageboardState.threads.toNumber() + 1;
   }
 
   async function getThread(threadId: number) {
@@ -77,7 +77,7 @@ describe("solchan_contract", () => {
     thread: anchor.web3.PublicKey
   ): Promise<number> {
     let threadstate = await program.account.threads.fetch(thread);
-    return threadstate.replyCount + 1;
+    return threadstate.replyCount.toNumber() + 1;
   }
 
   async function getReply(replyId: number, thread: anchor.web3.PublicKey) {
@@ -110,20 +110,18 @@ describe("solchan_contract", () => {
   ): Promise<anchor.web3.PublicKey> {
     const currentThreadId = await getNextThreadID();
     const currentThreadPDA = await getThreadPDA(currentThreadId);
-    console.log("Next thread ID:", currentThreadId, "Next thread PDA:", currentThreadPDA)
 
     await program.methods
-    .startThread(text, Buffer.from(image))
-    .accounts({
+      .startThread(text, Buffer.from(image))
+      .accounts({
         user: user.publicKey,
         imageboard: await getImageboardAccount(),
         thread: currentThreadPDA,
         systemProgram: anchor.web3.SystemProgram.programId,
-    })
-    .signers([user])
-    .rpc();
+      })
+      .signers([user])
+      .rpc();
 
-    console.log("Created PDA:", currentThreadPDA)
     return currentThreadPDA;
   }
 
