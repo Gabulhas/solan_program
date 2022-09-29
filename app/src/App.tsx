@@ -1,4 +1,7 @@
 import ReactXnft, { Text, View } from "react-xnft";
+import * as anchor from "@project-serum/anchor";
+import { THEME } from "./utils/theme";
+import {getImageboardAccount} from "./utils"
 
 //
 // On connection to the host environment, warm the cache.
@@ -10,8 +13,8 @@ ReactXnft.events.on("connect", () => {
 
 export function App() {
   return (
-    <View>
-      <Text>Hello, World!</Text>
+    <View style={{ height: "100%", backgroundColor: "#111827" }}>
+      <Text>{}</Text>
     </View>
   );
 }
