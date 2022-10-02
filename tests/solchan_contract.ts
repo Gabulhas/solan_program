@@ -3,6 +3,8 @@ import { Program } from "@project-serum/anchor";
 import { SolchanContract } from "../target/types/solchan_contract";
 import { PublicKey } from "@solana/web3.js";
 import { assert } from "chai";
+import {CID} from "multiformats/cid"
+
 
 describe("solchan_contract", () => {
   const provider = anchor.AnchorProvider.env();
@@ -11,6 +13,11 @@ describe("solchan_contract", () => {
   const program = anchor.workspace.SolchanContract as Program<SolchanContract>;
 
   const connection = provider.connection;
+
+
+  const imageExampleCID = "QmdgFSpKP4kbpus2ZVYKq3gLE92KGmBLRx3JZZKYXm4vyr"
+  const imageExampleCIDBytes = CIDtoBytes(imageExampleCID)
+  console.log(imageExampleCIDBytes)
 
   async function airdrop(acc: anchor.web3.Keypair) {
     let signature = await connection.requestAirdrop(
@@ -53,213 +60,227 @@ describe("solchan_contract", () => {
   }
 
   async function getThread(threadId: number) {
-    let threadAcc = await getThreadPDA(threadId);
-    let threadState = await program.account.threads.fetch(threadAcc);
-    return threadState;
+      let threadAcc = await getThreadPDA(threadId);
+      let threadState = await program.account.threads.fetch(threadAcc);
+      threadState.content.replier.toBase58()
+      return threadState;
   }
 
   async function getReplyPDA(
-    replyId: number,
-    thread: anchor.web3.PublicKey
+      replyId: number,
+      thread: anchor.web3.PublicKey
   ): Promise<anchor.web3.PublicKey> {
-    let [pda, _bump] = await PublicKey.findProgramAddress(
-      [
-        anchor.utils.bytes.utf8.encode("reply"),
-        thread.toBytes(),
-        anchor.utils.bytes.utf8.encode(`${replyId}`),
-      ],
-      program.programId
-    );
-    return pda;
+      let [pda, _bump] = await PublicKey.findProgramAddress(
+          [
+              anchor.utils.bytes.utf8.encode("reply"),
+              thread.toBytes(),
+              anchor.utils.bytes.utf8.encode(`${replyId}`),
+          ],
+          program.programId
+      );
+      return pda;
   }
 
   async function getNextReplyID(
-    thread: anchor.web3.PublicKey
+      thread: anchor.web3.PublicKey
   ): Promise<number> {
-    let threadstate = await program.account.threads.fetch(thread);
-    return threadstate.replyCount.toNumber() + 1;
+      let threadstate = await program.account.threads.fetch(thread);
+      return threadstate.replyCount.toNumber() + 1;
   }
 
   async function getReply(replyId: number, thread: anchor.web3.PublicKey) {
-    let replyAcc = await getReplyPDA(replyId, thread);
-    let replyState = await program.account.reply.fetch(replyAcc);
-    return replyState;
+      let replyAcc = await getReplyPDA(replyId, thread);
+      let replyState = await program.account.reply.fetch(replyAcc);
+      return replyState;
   }
 
   const authorityAcc = anchor.web3.Keypair.generate();
 
   it("Is initialized!", async () => {
-    const pda = await getImageboardAccount();
-    await airdrop(authorityAcc);
+      const pda = await getImageboardAccount();
+      await airdrop(authorityAcc);
 
-    await program.methods
+      await program.methods
       .initImageboard()
       .accounts({
-        authority: authorityAcc.publicKey,
-        imageboard: pda,
-        systemProgram: anchor.web3.SystemProgram.programId,
+          authority: authorityAcc.publicKey,
+          imageboard: pda,
+          systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([authorityAcc])
       .rpc();
   });
 
   async function startThreadGetPDA(
-    user: anchor.web3.Keypair,
-    text: string,
-    image: Uint8Array
+      user: anchor.web3.Keypair,
+      text: string,
+      image: Uint8Array
   ): Promise<anchor.web3.PublicKey> {
-    const currentThreadId = await getNextThreadID();
-    const currentThreadPDA = await getThreadPDA(currentThreadId);
+      const currentThreadId = await getNextThreadID();
+      const currentThreadPDA = await getThreadPDA(currentThreadId);
 
-    await program.methods
+      await program.methods
       .startThread(text, Buffer.from(image))
       .accounts({
-        user: user.publicKey,
-        imageboard: await getImageboardAccount(),
-        thread: currentThreadPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
+          user: user.publicKey,
+          imageboard: await getImageboardAccount(),
+          thread: currentThreadPDA,
+          systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([user])
       .rpc();
 
-    return currentThreadPDA;
+      return currentThreadPDA;
   }
 
   async function replyToThreadGetPDA(
-    user: anchor.web3.Keypair,
-    threadPDA: anchor.web3.PublicKey,
-    text: string,
-    image: Uint8Array
+      user: anchor.web3.Keypair,
+      threadPDA: anchor.web3.PublicKey,
+      text: string,
+      image: Uint8Array
   ): Promise<anchor.web3.PublicKey> {
-    const currentReplyID = await getNextReplyID(threadPDA);
-    const currentReplyPDA = await getReplyPDA(currentReplyID, threadPDA);
+      const currentReplyID = await getNextReplyID(threadPDA);
+      const currentReplyPDA = await getReplyPDA(currentReplyID, threadPDA);
 
-    await program.methods
+      await program.methods
       .replyToThread(text, Buffer.from(image))
       .accounts({
-        user: user.publicKey,
-        reply: currentReplyPDA,
-        thread: threadPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
+          user: user.publicKey,
+          reply: currentReplyPDA,
+          thread: threadPDA,
+          systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([user])
       .rpc();
 
-    return currentReplyPDA;
+      return currentReplyPDA;
   }
 
   it("Can create thread", async () => {
-    const op = anchor.web3.Keypair.generate();
-    await airdrop(op);
+      const op = anchor.web3.Keypair.generate();
+      await airdrop(op);
 
-    const myText = "Hello man";
+      const myText = "Hello man";
 
-    let newThreadPDA = await startThreadGetPDA(op, myText, new Uint8Array(32));
+      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
 
-    let threadState = await program.account.threads.fetch(newThreadPDA);
-    assert(threadState.content.text == myText);
+      let threadState = await program.account.threads.fetch(newThreadPDA);
+      console.log("Bytes", threadState.content.image, "\nCID", BytesToCID(Uint8Array.from(threadState.content.image)) == imageExampleCID)
+      assert(threadState.content.text == myText);
+      assert(BytesToCID(Uint8Array.from(threadState.content.image)) == imageExampleCID)
   });
 
   it("Can reply to thread", async () => {
-    const op = anchor.web3.Keypair.generate();
-    await airdrop(op);
+      const op = anchor.web3.Keypair.generate();
+      await airdrop(op);
 
-    const replier = anchor.web3.Keypair.generate();
-    await airdrop(replier);
-
-    const myText = "My second thread man";
-    let newThreadPDA = await startThreadGetPDA(op, myText, new Uint8Array(32));
-    let threadState = await program.account.threads.fetch(newThreadPDA);
-    assert(threadState.content.text == myText);
-
-    const myReplyText = "Hey! Wassup!";
-    let newReplyPDA = await replyToThreadGetPDA(
-      replier,
-      newThreadPDA,
-      myReplyText,
-      new Uint8Array(32)
-    );
-    let replyState = await program.account.reply.fetch(newReplyPDA);
-    assert(replyState.content.text == myReplyText);
-  });
-
-  it("Can multiple reply to thread", async () => {
-    const op = anchor.web3.Keypair.generate();
-    await airdrop(op);
-
-    const myText = "My third thread, it works!";
-    let newThreadPDA = await startThreadGetPDA(op, myText, new Uint8Array(32));
-    let threadState = await program.account.threads.fetch(newThreadPDA);
-    assert(threadState.content.text == myText);
-
-    const random_replies = [
-      "Nice!",
-      "Glad it works!",
-      "What's this",
-      "Nah, it doesn't work for sure",
-      "yo man",
-    ];
-
-    let i = 0;
-    for (const replyText in random_replies) {
-      i = i + 1;
       const replier = anchor.web3.Keypair.generate();
       await airdrop(replier);
 
-      const myReplyText = replyText;
+      const myText = "My second thread man";
+      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      let threadState = await program.account.threads.fetch(newThreadPDA);
+      assert(threadState.content.text == myText);
+
+      const myReplyText = "Hey! Wassup!";
       let newReplyPDA = await replyToThreadGetPDA(
-        replier,
-        newThreadPDA,
-        myReplyText,
-        new Uint8Array(32)
+          replier,
+          newThreadPDA,
+          myReplyText,
+          imageExampleCIDBytes
       );
       let replyState = await program.account.reply.fetch(newReplyPDA);
+      assert(replyState.content.text == myReplyText);
+  });
 
-      let replyPDAFromID = await getReplyPDA(i, newThreadPDA);
-      let replyStateFromID = await program.account.reply.fetch(replyPDAFromID);
+  it("Can multiple reply to thread", async () => {
+      const op = anchor.web3.Keypair.generate();
+      await airdrop(op);
 
-      assert(
-        replyState.content.text == myReplyText &&
-          replyStateFromID.content.text == replyState.content.text &&
-          replyStateFromID.content.text == myReplyText
-      );
-    }
+      const myText = "My third thread, it works!";
+      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      let threadState = await program.account.threads.fetch(newThreadPDA);
+      assert(threadState.content.text == myText);
+
+      const random_replies = [
+          "Nice!",
+          "Glad it works!",
+          "What's this",
+          "Nah, it doesn't work for sure",
+              "yo man",
+      ];
+
+      let i = 0;
+      for (const replyText in random_replies) {
+          i = i + 1;
+          const replier = anchor.web3.Keypair.generate();
+          await airdrop(replier);
+
+          const myReplyText = replyText;
+          let newReplyPDA = await replyToThreadGetPDA(
+              replier,
+              newThreadPDA,
+              myReplyText,
+              imageExampleCIDBytes
+          );
+          let replyState = await program.account.reply.fetch(newReplyPDA);
+
+          let replyPDAFromID = await getReplyPDA(i, newThreadPDA);
+          let replyStateFromID = await program.account.reply.fetch(replyPDAFromID);
+
+          assert(
+              replyState.content.text == myReplyText &&
+                  replyStateFromID.content.text == replyState.content.text &&
+                  replyStateFromID.content.text == myReplyText
+          );
+      }
   });
 
   it("You can't reply with the same ID", async () => {
-    const op = anchor.web3.Keypair.generate();
-    await airdrop(op);
+      const op = anchor.web3.Keypair.generate();
+      await airdrop(op);
 
-    const myText = "My third thread, it works!";
-    let newThreadPDA = await startThreadGetPDA(op, myText, new Uint8Array(32));
-    let threadState = await program.account.threads.fetch(newThreadPDA);
-    assert(threadState.content.text == myText);
+      const myText = "This is another thread. What's up?";
+      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      let threadState = await program.account.threads.fetch(newThreadPDA);
+      assert(threadState.content.text == myText);
 
-    const hackerino = anchor.web3.Keypair.generate();
-    await airdrop(hackerino);
+      const hackerino = anchor.web3.Keypair.generate();
+      await airdrop(hackerino);
 
-    let replyPDAFromID = await getReplyPDA(0, newThreadPDA);
+      let replyPDAFromID = await getReplyPDA(0, newThreadPDA);
 
-    await program.methods
-      .replyToThread("THIS MY TEXT", Buffer.from(new Uint8Array(32)))
+      await program.methods
+      .replyToThread("THIS MY TEXT", Buffer.from(imageExampleCIDBytes))
       .accounts({
-        user: hackerino.publicKey,
-        reply: replyPDAFromID,
-        thread: newThreadPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
+          user: hackerino.publicKey,
+          reply: replyPDAFromID,
+          thread: newThreadPDA,
+          systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([hackerino])
       .rpc();
 
-    await program.methods
-      .replyToThread("THIS MY SECOND TEXT", Buffer.from(new Uint8Array(32)))
+      await program.methods
+      .replyToThread("THIS MY SECOND TEXT", Buffer.from(imageExampleCIDBytes))
       .accounts({
-        user: hackerino.publicKey,
-        reply: replyPDAFromID, //SAME PDA
-        thread: newThreadPDA,
-        systemProgram: anchor.web3.SystemProgram.programId,
+          user: hackerino.publicKey,
+          reply: replyPDAFromID, //SAME PDA
+          thread: newThreadPDA,
+          systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([hackerino])
       .rpc();
   });
 });
+
+
+function CIDtoBytes(cid: string): Uint8Array {
+    return CID.parse(cid).bytes.slice(2, 34)
+}
+
+function BytesToCID(bts: Uint8Array): string{
+    const prefix = [18, 32]
+    let result = new Uint8Array([...prefix, ...bts])
+    return CID.decode(result).toString()
+}

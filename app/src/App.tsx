@@ -1,7 +1,6 @@
-import ReactXnft, { Text, View } from "react-xnft";
-import * as anchor from "@project-serum/anchor";
-import { THEME } from "./utils/theme";
-import {getImageboardAccount} from "./utils"
+import ReactXnft, { View } from "react-xnft";
+import {GetLandingPageScreen} from "./LandingPage"
+import { black } from "./Theme/colors";
 
 //
 // On connection to the host environment, warm the cache.
@@ -13,8 +12,8 @@ ReactXnft.events.on("connect", () => {
 
 export function App() {
   return (
-    <View style={{ height: "100%", backgroundColor: "#111827" }}>
-      <Text>{}</Text>
+    <View style={{ height: "100%", backgroundColor: black}}>
+        <GetLandingPageScreen/>
     </View>
   );
 }

@@ -36,14 +36,17 @@ impl Imageboard {
 
 #[account]
 pub struct Threads {
+    pub thread_id: u64,
+    //MAYBE ADD TITLE? 
     pub content: Content,
     pub reply_count: u64,
 }
 
 impl Threads {
-    pub const SIZE: usize = 8 + Content::SIZE + 8;
-    pub fn new(content: Content) -> Threads {
+    pub const SIZE: usize = 8 + 8 + Content::SIZE + 8;
+    pub fn new(content: Content, thread_id: u64) -> Threads {
         Threads {
+            thread_id,
             content,
             reply_count: 0,
         }
@@ -52,12 +55,14 @@ impl Threads {
 
 #[account]
 pub struct Reply {
+    pub thread_id: u64,
+    pub reply_id: u64,
     pub content: Content,
 }
 
 impl Reply {
-    pub const SIZE: usize = 8 + Content::SIZE;
-    pub fn new(content: Content) -> Reply {
-        Reply { content }
+    pub const SIZE: usize = 8 + 8 + 8 + Content::SIZE;
+    pub fn new(content: Content, thread_id: u64, reply_id: u64) -> Reply {
+        Reply { content, thread_id, reply_id }
     }
 }

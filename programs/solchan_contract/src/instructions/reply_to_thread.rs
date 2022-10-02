@@ -6,7 +6,7 @@ pub fn reply_to_thread(ctx: Context<ReplyToThread>, text: String, image: [u8; 32
     let thread_acc = &mut ctx.accounts.thread;
     ctx.accounts
         .reply
-        .set_inner(Reply::new(Content::new(user_acc.key(), text, image)));
+        .set_inner(Reply::new(Content::new(user_acc.key(), text, image), thread_acc.thread_id, thread_acc.reply_count + 1));
     thread_acc.reply_count += 1;
     Ok(())
 }

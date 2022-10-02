@@ -3,6 +3,7 @@ import {Program} from "@project-serum/anchor";
 import {PublicKey} from "@solana/web3.js";
 import {useEffect, useState} from "react";
 import ReactXnft, {LocalStorage, useConnection, usePublicKey} from "react-xnft";
+import {CID} from "multiformats/cid"
 
 import {IDL, SolchanContract} from "../../../target/types/solchan_contract";
 
@@ -14,24 +15,19 @@ export function getLandingThreads() {
   const publicKey = usePublicKey();
   const connection = useConnection();
 
-  const [tokenAccounts, setTokenAccounts] = useState<[ any ]|null>(null);
+  const [landingThreads, setLandingThreads] = useState<(Object | null)[]>([]);
 
   useEffect(() => {
     (async () => {
-      setTokenAccounts(null);
-      const res = await getLastN();
-      setTokenAccounts(res);
+      setLandingThreads([]);
+      const res = await getLastN(40);
+      setLandingThreads(res);
     })();
   }, [ publicKey, connection ]);
-  if (tokenAccounts === null) {
+  if (landingThreads === null) {
     return null;
   }
-  return {
-    dead : tokenAccounts[0].map((t) => ({...t, isStaked : true})),
-    alive : tokenAccounts[1].map((t) => ({...t, isStaked : true})),
-    deadUnstaked : tokenAccounts[2].map((t) => ({...t, isStaked : false})),
-    aliveUnstaked : tokenAccounts[3].map((t) => ({...t, isStaked : false})),
-  };
+  return landingThreads;
 }
 
 export async function getImageboardAccount(): Promise<anchor.web3.PublicKey> {
@@ -72,9 +68,8 @@ export async function getLastN(n: number) {
     threadsToFetch.push(await getThreadPDA(i))
   }
 
-  let threadsFetched = await getProgram().account.threads.fetchMultiple();
-  let threadstate = await getProgram().account.threads.fetch(thread);
-  return threadstate.replyCount.toNumber() + 1;
+  let threadsFetched = await getProgram().account.threads.fetchMultiple(threadsToFetch);
+  return threadsFetched.filter((thread) => thread != null)
 }
 
 export async function getReplyPDA(replyId: number,
@@ -103,3 +98,16 @@ export async function getReply(replyId: number, thread: anchor.web3.PublicKey) {
 }
 
 const PID = new PublicKey("HLN8PXJgGPHkATnWqWCABgaszEUPR9x13zc9iL6sz883");
+
+
+export function bytesToIPFSlink(imageBytes: Uint8Array): string {
+    const asCID = BytesToCID(imageBytes)
+    return `https://ipfs.io/ipfs/${asCID}`
+}
+
+export function BytesToCID(bts: Uint8Array): string{
+    const prefix = [18, 32]
+    let result = new Uint8Array([...prefix, ...bts])
+    return CID.decode(result).toString()
+}
+

@@ -7,36 +7,27 @@ import {
   Stack,
   Loading,
 } from "react-xnft";
-import { useDegodTokens } from "../utils";
-import { UnlockIcon, LockIcon } from "../utils/icon";
+import { bytesToIPFSlink, getLandingThreads } from "../utils";
+import {black, cyan, magenta, white, yellow} from "../Theme/colors"
 
+export function ThreadsGridScreen() {
+  const landingThreads = getLandingThreads()!;
+  console.log(landingThreads);
 
-export function GodGridScreen() {
-  const isDead = false;
-  const tokenAccounts = useDegodTokens()!;
-
-  if (tokenAccounts === null) {
+  if (landingThreads === null) {
+    console.log("Loading");
     return <LoadingIndicator />;
   }
-
-  return (
-    <GodGrid
-      isDead={isDead}
-      staked={tokenAccounts.dead}
-      unstaked={tokenAccounts.deadUnstaked}
-      isStaked={true}
-    />
-  );
+  return <ThreadsGrid threads={landingThreads} />;
 }
 
-function GodGrid({ staked, unstaked, isDead }: any) {
+function ThreadsGrid({ threads }: any) {
   const nav = useNavigation();
 
-  const clickGod = (god: any) => {
-    nav.push("detail", { god });
+  // TODO: make this open the thread view
+  const clickThread = (thread: any) => {
+    nav.push("detail", { thread });
   };
-
-  const gods = (staked ?? []).concat(unstaked ?? []);
 
   return (
     <View
@@ -48,36 +39,39 @@ function GodGrid({ staked, unstaked, isDead }: any) {
     >
       <View
         style={{
-          marginTop: "8px",
-          display: "flex",
+          marginTop: "10px",
+          display: "grid",
           justifyContent: "space-between",
+          columnGap: "20px",
+          rowGap: "20px",
+          gridTemplateColumns: "1fr 1fr",
         }}
       >
-        {gods.map((g) => {
+        {threads.map((thread, index) => {
           return (
-            <View>
-              <Button
-                key={g.tokenMetaUriData.image}
-                onClick={() => clickGod(g)}
+            <View
+              key={thread.threadId}
+              style={{
+                marginBottom: "0px",
+                boxShadow: "0px 4px 8px 0 rgba(0,0,0,0.9)",
+                border: "4px",
+                borderRadius: "5px",
+              }}
+            >
+              <Image
+                src={bytesToIPFSlink(thread.content.image)}
                 style={{
-                  padding: 0,
-                  width: "157.5px",
-                  height: "157.5px",
                   borderRadius: "6px",
+                  width: "100%",
+                  height: "auto",
                 }}
-              >
-                <Image
-                  src={g.tokenMetaUriData.image}
-                  style={{
-                    borderRadius: "6px",
-                    width: "157.5px",
-                  }}
-                />
-              </Button>
+              />
               <View
                 style={{
                   marginTop: "3px",
-                  display: "flex",
+                  marginLeft: "10px",
+                  marginRight: "10px",
+                  marginBottom: "5px",
                   justifyContent: "space-between",
                 }}
               >
@@ -85,51 +79,35 @@ function GodGrid({ staked, unstaked, isDead }: any) {
                   style={{
                     fontSize: "12px",
                     lineHeight: "19.08px",
+                    color: white
                   }}
                 >
-                  {g.tokenMetaUriData.name.slice("DeGod ".length)}
+                  By: {thread.content.replier.toBase58().slice(0, 10) + "..."}
                 </Text>
-                <View style={{ display: "flex" }}>
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      marginRight: "2px",
-                    }}
-                  >
-                    {g.isStaked ? <LockIcon /> : <UnlockIcon />}
-                  </View>
-                  <Text
-                    style={{
-                      fontSize: "12px",
-                      lineHeight: "19.08px",
-                    }}
-                  >
-                    {g.isStaked ? "Staked" : "Unstaked"}
-                  </Text>
-                </View>
+                <Text
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: "19.08px",
+                    marginBottom: "10px",
+                    color: magenta
+                  }}
+                >
+                  Replies: {thread.replyCount.toNumber()}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: "19.08px",
+                    color: cyan,
+
+                  }}
+                >
+                  {thread.content.text.length >= 40? thread.content.text.slice(0, 40) + "...": thread.content.text}
+                </Text>
               </View>
             </View>
           );
         })}
-      </View>
-      <View
-        style={{
-          marginTop: "24px",
-          marginBottom: "24px",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: "12px",
-            textAlign: "center",
-          }}
-        >
-          👋 Browse Magic Eden
-        </Text>
       </View>
     </View>
   );

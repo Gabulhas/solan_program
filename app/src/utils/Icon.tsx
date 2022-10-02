@@ -1,5 +1,52 @@
 import { Svg, Path } from "react-xnft";
 
+export function PlusIcon({ fill = "#FFEFEB" }) {
+  return (
+    <Svg
+      fill={fill}
+      width="25"
+      height="25"
+      version="1.1"
+      id="lni_lni-circle-plus"
+      x="0px"
+      y="0px"
+      viewBox="0 0 64 64"
+      style="enable-background:new 0 0 64 64;"
+    >
+      <Path
+        d="M42.6,30.2C42.6,30.2,42.5,30.2,42.6,30.2l-8.8,0l0-8.8c0-1-0.8-1.7-1.8-1.7c0,0,0,0,0,0c-1,0-1.7,0.8-1.7,1.8l0,8.8
+		l-8.8,0c-1,0-1.7,0.8-1.7,1.8c0,1,0.8,1.7,1.8,1.7c0,0,0,0,0,0l8.8,0l0,8.8c0,1,0.8,1.7,1.8,1.7c0,0,0,0,0,0c1,0,1.7-0.8,1.7-1.8
+		l0-8.8l8.8,0c1,0,1.7-0.8,1.7-1.8C44.3,31,43.5,30.2,42.6,30.2z"
+      />
+      <Path
+        d="M32,1.3C15,1.3,1.3,15,1.3,32S15,62.8,32,62.8S62.8,49,62.8,32S49,1.3,32,1.3z M32,59.3C17,59.3,4.8,47,4.8,32
+		S17,4.8,32,4.8S59.3,17,59.3,32S47,59.3,32,59.3z"
+      />
+    </Svg>
+  );
+}
+
+export function ThreadsIcon({ fill = "#FFFFFF" }) {
+  return (
+    <Svg
+      fill={fill}
+      width="25"
+      height="25"
+      version="1.1"
+      id="lni_lni-text-align-left"
+      x="0px"
+      y="0px"
+      viewBox="0 0 64 64"
+      style="enable-background:new 0 0 64 64;"
+    >
+      <Path d="M3,7.5h42.2c1,0,1.8-0.8,1.8-1.8S46.1,4,45.2,4H3C2,4,1.3,4.8,1.3,5.7S2,7.5,3,7.5z" />
+      <Path d="M3,25h50.1c1,0,1.8-0.8,1.8-1.8s-0.8-1.8-1.8-1.8H3c-1,0-1.8,0.8-1.8,1.8S2,25,3,25z" />
+      <Path d="M3,42.5h34.3c1,0,1.8-0.8,1.8-1.8S38.2,39,37.3,39H3c-1,0-1.8,0.8-1.8,1.8S2,42.5,3,42.5z" />
+      <Path d="M61,56.5H3c-1,0-1.8,0.8-1.8,1.8S2,60,3,60h58c1,0,1.8-0.8,1.8-1.8S62,56.5,61,56.5z" />
+    </Svg>
+  );
+}
+
 export function DegodsIcon({ fill = "#FFEFEB" }) {
   return (
     <Svg width="25" height="25" viewBox="0 0 25 25" fill="none">
