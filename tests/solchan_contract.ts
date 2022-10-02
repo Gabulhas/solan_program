@@ -15,9 +15,6 @@ describe("solchan_contract", () => {
   const connection = provider.connection;
 
 
-  const imageExampleCID = "QmdgFSpKP4kbpus2ZVYKq3gLE92KGmBLRx3JZZKYXm4vyr"
-  const imageExampleCIDBytes = CIDtoBytes(imageExampleCID)
-  console.log(imageExampleCIDBytes)
 
   async function airdrop(acc: anchor.web3.Keypair) {
     let signature = await connection.requestAirdrop(
@@ -160,14 +157,14 @@ describe("solchan_contract", () => {
       const op = anchor.web3.Keypair.generate();
       await airdrop(op);
 
-      const myText = "Hello man";
+      const myText = "Hey frens. Just came here to say this. WGMI!";
+      const myImageCID = "QmaP1F6uG2AxNd4RY6RC5Zs1E7ynnRvqqufVk6EkrfsVPh"
 
-      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      let newThreadPDA = await startThreadGetPDA(op, myText, CIDtoBytes(myImageCID));
 
       let threadState = await program.account.threads.fetch(newThreadPDA);
-      console.log("Bytes", threadState.content.image, "\nCID", BytesToCID(Uint8Array.from(threadState.content.image)) == imageExampleCID)
       assert(threadState.content.text == myText);
-      assert(BytesToCID(Uint8Array.from(threadState.content.image)) == imageExampleCID)
+      assert(BytesToCID(Uint8Array.from(threadState.content.image)) == myImageCID)
   });
 
   it("Can reply to thread", async () => {
@@ -177,8 +174,10 @@ describe("solchan_contract", () => {
       const replier = anchor.web3.Keypair.generate();
       await airdrop(replier);
 
-      const myText = "My second thread man";
-      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      const myText = "Have you guys ever listen to this master piece? Just checkout this Portuguese artist, his musics were my summer jams!";
+      const myImageCID = "QmUJxKqUZJaV3vsQjnBivtBUHL1U22vpHKHNPYVrtBFRs5"
+
+      let newThreadPDA = await startThreadGetPDA(op, myText, CIDtoBytes(myImageCID));
       let threadState = await program.account.threads.fetch(newThreadPDA);
       assert(threadState.content.text == myText);
 
@@ -187,7 +186,7 @@ describe("solchan_contract", () => {
           replier,
           newThreadPDA,
           myReplyText,
-          imageExampleCIDBytes
+          new Uint8Array(32)
       );
       let replyState = await program.account.reply.fetch(newReplyPDA);
       assert(replyState.content.text == myReplyText);
@@ -197,17 +196,20 @@ describe("solchan_contract", () => {
       const op = anchor.web3.Keypair.generate();
       await airdrop(op);
 
-      const myText = "My third thread, it works!";
-      let newThreadPDA = await startThreadGetPDA(op, myText, imageExampleCIDBytes);
+      const myText = "Solana bros, who else is coming to Solana Breakpoint? Never been in Portugal, just wondering how good the food is.";
+      const myImageCID = "QmUjEHMjt9xpcNqvZ8LwDprjo8wdUsWo7FTTKhqeF6rJfM"
+
+
+      let newThreadPDA = await startThreadGetPDA(op, myText, CIDtoBytes(myImageCID));
       let threadState = await program.account.threads.fetch(newThreadPDA);
       assert(threadState.content.text == myText);
 
       const random_replies = [
-          "Nice!",
-          "Glad it works!",
-          "What's this",
-          "Nah, it doesn't work for sure",
-              "yo man",
+          "AFAIK it's really damn good!",
+          "Dude, make sure to try out some Natas!",
+          "Never tried, but I heard it's good.",
+          "It's the best.",
+          "I liked it when I went to Algarve last year.",
       ];
 
       let i = 0;
@@ -221,7 +223,7 @@ describe("solchan_contract", () => {
               replier,
               newThreadPDA,
               myReplyText,
-              imageExampleCIDBytes
+              new Uint8Array(32)
           );
           let replyState = await program.account.reply.fetch(newReplyPDA);
 
