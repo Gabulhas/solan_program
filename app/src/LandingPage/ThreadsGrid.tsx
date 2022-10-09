@@ -3,12 +3,11 @@ import {
   View,
   Image,
   Text,
-  Button,
-  Stack,
-  Loading,
 } from "react-xnft";
+
+import {LoadingIndicator} from "./LoadingIndicator"
 import { bytesToIPFSlink, getLandingThreads } from "../utils";
-import {black, cyan, magenta, white, yellow} from "../Theme/colors"
+import {cyan, magenta, white} from "../Theme/colors"
 
 export function ThreadsGridScreen() {
   const landingThreads = getLandingThreads()!;
@@ -25,8 +24,8 @@ function ThreadsGrid({ threads }: any) {
   const nav = useNavigation();
 
   // TODO: make this open the thread view
-  const clickThread = (thread: any) => {
-    nav.push("detail", { thread });
+  const clickThread = (threadId: any) => {
+    nav.push("replies", { threadId });
   };
 
   return (
@@ -51,6 +50,8 @@ function ThreadsGrid({ threads }: any) {
           return (
             <View
               key={thread.threadId}
+              onClick={() => clickThread(thread.threadId)}
+
               style={{
                 marginBottom: "0px",
                 boxShadow: "0px 4px 8px 0 rgba(0,0,0,0.9)",
@@ -113,19 +114,3 @@ function ThreadsGrid({ threads }: any) {
   );
 }
 
-function LoadingIndicator() {
-  return (
-    <View
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        height: "100%",
-      }}
-    >
-      <Loading
-        style={{ display: "block", marginLeft: "auto", marginRight: "auto" }}
-      />
-    </View>
-  );
-}

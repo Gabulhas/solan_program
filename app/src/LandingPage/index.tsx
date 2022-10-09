@@ -1,7 +1,8 @@
 import { Stack, Tab, View } from "react-xnft";
 import { ThreadsGridScreen } from "./ThreadsGrid";
-import { black, grey, magenta, white } from "../Theme/colors";
-import {DegodsIcon, GodsIcon, PlusIcon, ThreadsIcon} from "../utils/Icon"
+import { RepliesListScreen } from "./RepliesList";
+import { black, magenta, white } from "../Theme/colors";
+import {PlusIcon, ThreadsIcon} from "../utils/Icon"
 
 function GetLandingThreads() {
   return (
@@ -12,6 +13,10 @@ function GetLandingThreads() {
           case "main":
             return {
               title: "Latest Threads",
+            };
+          case "replies":
+            return {
+              title: `Thread ${route.props.threadId}`,
             };
           default:
             throw new Error("unknown route");
@@ -25,9 +30,14 @@ function GetLandingThreads() {
         name={"main"}
         component={(props: any) => <ThreadsGridScreen {...props} />}
       />
+      <Stack.Screen
+        name={"replies"}
+        component={(props: any) => <RepliesListScreen {...props} />}
+      />
     </Stack.Navigator>
   );
 }
+
 export function GetLandingPageScreen() {
     return (
     <View style={{ height: "100%", backgroundColor: black }}>
