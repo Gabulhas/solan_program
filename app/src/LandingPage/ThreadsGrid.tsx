@@ -13,7 +13,7 @@ export function ThreadsGridScreen() {
   const landingThreads = getLandingThreads()!;
   console.log(landingThreads);
 
-  if (landingThreads === null) {
+  if (landingThreads == null) {
     console.log("Loading");
     return <LoadingIndicator />;
   }
