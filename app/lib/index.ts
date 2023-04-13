@@ -1,16 +1,48 @@
-import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
-import { PublicKey } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor";
+import { Program} from "@coral-xyz/anchor";
+import { PublicKey, Connection} from "@solana/web3.js";
 import { useEffect, useState } from "react";
-import { useConnection, usePublicKey } from "react-xnft";
 import { CID } from "multiformats/cid";
+import { IDL, SolchanContract } from "./solchan_contract";
+import { metadata } from "./solchan_contract.json";
 
-import { IDL, SolchanContract } from "../../../target/types/solchan_contract";
 
-const PID = new PublicKey("9R9BdZFdYwwqCYoC3YkPD8M746Eyu3qh4MdUhB17UbY4");
+
+const opts = {
+  preflightCommitment: "recent",
+};
+
+const PID = new PublicKey(metadata.address);
+
+let establishedConnection: Connection | null = null;
+
+export function useConnection () {
+  if (establishedConnection !== null) {
+    return establishedConnection;
+  }
+
+  const rpcUrl = 'http://127.0.0.1:8899';
+  establishedConnection = new Connection(rpcUrl, 'confirmed');
+  console.log('Connection to cluster established:', rpcUrl);
+
+  return establishedConnection;
+};
+
+//Temp
+function usePublicKey(){
+    return "Ck49mtEqF7RwagLh2at2jv6RzXKLyYivTCdAUQK4kVWB"
+}
 
 export function getProgram(): Program<SolchanContract> {
-  return new Program<SolchanContract>(IDL, PID, window.xnft);
+    const wallet = window.solana
+
+    const connection = useConnection();
+
+    const provider = new anchor.AnchorProvider(
+      connection, wallet, opts.preflightCommitment,
+    )
+
+    return new Program<SolchanContract>(IDL, PID, provider);
 }
 
 export function getLandingThreads() {
@@ -60,7 +92,7 @@ export function getThreadContent(threadId: number) {
 }
 
 export async function getImageboardAccount(): Promise<anchor.web3.PublicKey> {
-  let [pda, _bump] = await PublicKey.findProgramAddress(
+  let [pda, _bump] = PublicKey.findProgramAddressSync(
     [anchor.utils.bytes.utf8.encode("imageboard")],
     getProgram().programId
   );
@@ -70,7 +102,7 @@ export async function getImageboardAccount(): Promise<anchor.web3.PublicKey> {
 export async function getThreadPDA(
   threadId: number
 ): Promise<anchor.web3.PublicKey> {
-  let [pda, _bump] = await PublicKey.findProgramAddress(
+  let [pda, _bump] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("thread"),
       anchor.utils.bytes.utf8.encode(`${threadId}`),
@@ -126,7 +158,7 @@ export async function getReplyPDA(
   replyId: number,
   thread: anchor.web3.PublicKey
 ): Promise<anchor.web3.PublicKey> {
-  let [pda, _bump] = await PublicKey.findProgramAddress(
+  let [pda, _bump] = PublicKey.findProgramAddressSync(
     [
       anchor.utils.bytes.utf8.encode("reply"),
       thread.toBytes(),

@@ -1,0 +1,1 @@
+- make a client that can be easily hosted in the app itself

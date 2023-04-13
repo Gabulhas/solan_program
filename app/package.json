@@ -1,25 +1,24 @@
 {
-  "name": "xnft-quickstart",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "build": "xnft build",
-    "start": "xnft watch",
-    "dev": "xnft dev"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@coral-xyz/xnft-cli": "latest",
-    "@rollup/plugin-json": "^4.1.0"
+    "dev": "next dev",
+    "build": "mv ../target/types/solchan_contract.ts lib/solchan_contract.ts && mv ../target/idl/solchan_contract.json lib/solchan_contract.json && next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.25.0",
-    "@solana/web3.js": "^1.63.1",
-    "@types/rebass": "^4.0.10",
-    "multiformats": "^9.9.0",
-    "react": "^17.0.2",
-    "react-xnft": "latest"
+    "@geist-ui/core": "^2.3.8",
+    "@types/node": "18.15.11",
+    "@types/react": "18.0.34",
+    "@types/react-dom": "18.0.11",
+    "autoprefixer": "10.4.14",
+    "next": "13.3.0",
+    "postcss": "8.4.21",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.1",
+    "typescript": "5.0.4"
   }
 }
